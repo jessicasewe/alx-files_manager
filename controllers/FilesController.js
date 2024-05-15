@@ -2,7 +2,7 @@ import { ObjectID } from 'mongodb';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import Queue from 'bull';
-import { findUserIdByToken } from '../utils/helpers';
+//import { findUserIdByToken } from '../utils/helpers';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
 
