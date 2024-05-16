@@ -8,12 +8,38 @@ const url = `mongodb://${host}:${port}/`;
 class DBClient {
   constructor() {
     this.db = null;
-    MongoClient.connect(url, { useUnifiedTopology: true }, (error, client) => {
-      if (error) console.log(error);
-      this.db = client.db(database);
-      this.db.createCollection('users');
-      this.db.createCollection('files');
-    });
+    this.client = null;
+    this.connect();
+  }
+
+  async connect() {
+    try {
+      this.client = await MongoClient.connect(url, { useUnifiedTopology: true });
+      this.db = this.client.db(database);
+      await this.ensureCollectionsExist();
+      console.log('Connected to MongoDB and ensured collections exist.');
+    } catch (error) {
+      console.error('Error connecting to MongoDB:', error);
+    }
+  }
+
+  async ensureCollectionsExist() {
+    const collections = await this.db.listCollections().toArray();
+    const collectionNames = collections.map((col) => col.name);
+
+    if (!collectionNames.includes('users')) {
+      await this.db.createCollection('users');
+      console.log('Created collection "users"');
+    } else {
+      console.log('Collection "users" already exists');
+    }
+
+    if (!collectionNames.includes('files')) {
+      await this.db.createCollection('files');
+      console.log('Created collection "files"');
+    } else {
+      console.log('Collection "files" already exists');
+    }
   }
 
   isAlive() {
@@ -21,20 +47,36 @@ class DBClient {
   }
 
   async nbUsers() {
-    return this.db.collection('users').countDocuments();
+    try {
+      return await this.db.collection('users').countDocuments();
+    } catch (error) {
+      console.error('Error counting users:', error);
+      return 0;
+    }
   }
 
   async getUser(query) {
-    console.log('QUERY IN DB.JS', query);
-    const user = await this.db.collection('users').findOne(query);
-    console.log('GET USER IN DB.JS', user);
-    return user;
+    try {
+      console.log('QUERY IN DB.JS', query);
+      const user = await this.db.collection('users').findOne(query);
+      console.log('GET USER IN DB.JS', user);
+      return user;
+    } catch (error) {
+      console.error('Error getting user:', error);
+      return null;
+    }
   }
 
   async nbFiles() {
-    return this.db.collection('files').countDocuments();
+    try {
+      return await this.db.collection('files').countDocuments();
+    } catch (error) {
+      console.error('Error counting files:', error);
+      return 0;
+    }
   }
 }
 
 const dbClient = new DBClient();
 export default dbClient;
+
