@@ -1,12 +1,16 @@
-const express = require('express');
-const routes = require('./routes/index');
+/* eslint-disable jest/require-hook */
+import express from 'express';
+import router from './routes/index';
+
+const port = parseInt(process.env.PORT, 10) || 5000;
 
 const app = express();
-const port = 5000 || process.env.PORT;
 
 app.use(express.json());
-app.use('/', routes);
+app.use('/', router);
 
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`server running on port ${port}`);
 });
+
+export default app;
